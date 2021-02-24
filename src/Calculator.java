@@ -20,19 +20,34 @@ public class Calculator {
     }
 
     /**
+     * get the string representation of a double, by integer representation if it is a round number.
+     * @param num - double to get string representation of.
+     * @return - string representation of the double.
+     */
+    private String stringOf(double num){
+        String temp = String.valueOf(num);
+        if (num == Math.floor(num) && !Double.isInfinite(num)){
+            return temp.split("\\.")[0];
+        }
+        return temp;
+    }
+
+    /**
      * deals with digit as an input.
      * @param jsonMap - map to update
      * @param input - input to update the map.
      * @return - a string representation of the updated map.
      */
     private String insertDigit(Map<String, String> jsonMap, char input){
-        if (!jsonMap.get("lastInsertionWasOp").equals("true")){     // if last insertion wasn't an operator
+        if (!jsonMap.get("lastInsertionWasOp").equals("true") || (jsonMap.get("lastInsertionWasOp").equals("true") && jsonMap.get("display").equals("-"))){     // if last insertion wasn't an operator
+                                                                                                                                        // or last insertion declared a negative number
             jsonMap.put("display", jsonMap.get("display") + input);
         }
         else {
             jsonMap.put("display", String.valueOf(input));
             jsonMap.put("lastInsertionWasOp", "false");
         }
+        jsonMap.put("lastInsertionWasOp", "false");
         return new JSONObject(jsonMap).toJSONString();
     }
 
@@ -43,31 +58,46 @@ public class Calculator {
      * @return - updated map.
      */
     private String insertOperator(Map<String, String> jsonMap, String operator) throws BadInputException{
-        if (jsonMap.get("lastInsertionWasOp").equals("true")){
+        if (jsonMap.get("lastInsertionWasOp").equals("true") && operator.equals("=")){
             throw new BadInputException("Inserted two operators in a row.");
         }
         if (jsonMap.get("result") != null){   // it is not the first operator given by the user
-            double currentVal = Double.parseDouble(jsonMap.get("result"));
-            double displayVal = Double.parseDouble(jsonMap.get("display"));
-            switch (jsonMap.get("operator")){
-                case "+":
-                    jsonMap.put("result", String.valueOf(currentVal + displayVal));
-                    break;
-                case "*":
-                    jsonMap.put("result", String.valueOf(currentVal * displayVal));
-                    break;
-                case "-":
-                    jsonMap.put("result", String.valueOf(currentVal - displayVal));
-                    break;
-                case "/":
-                    jsonMap.put("result", String.valueOf(currentVal / displayVal));
-                    break;
+            if (!jsonMap.get("lastInsertionWasOp").equals("true")){
+                double currentVal = Double.parseDouble(jsonMap.get("result"));
+                double displayVal = Double.parseDouble(jsonMap.get("display"));
+                switch (jsonMap.get("operator")){
+                    case "+":
+                        jsonMap.put("result", this.stringOf(currentVal + displayVal));
+                        break;
+                    case "*":
+                        jsonMap.put("result", this.stringOf(currentVal * displayVal));
+                        break;
+                    case "-":
+                        jsonMap.put("result", this.stringOf(currentVal - displayVal));
+                        break;
+                    case "/":
+                        if (displayVal == 0.0){
+                            throw new BadInputException("Can not divide by zero.");
+                        }
+                        jsonMap.put("result", this.stringOf(currentVal / displayVal));
+                        break;
+                }
             }
+            else{
+                if (operator.equals("-")){
+                    jsonMap.put("display", operator);
+                }
+                else {
+                    jsonMap.put("operator", operator);
+                }
+            }
+
         }
         else {
             jsonMap.put("result", jsonMap.get("display"));
+            jsonMap.put("operator", operator);
         }
-        jsonMap.put("operator", operator);
+
         if (operator.equals("=")){
             jsonMap.put("display", jsonMap.get("result"));
         }
@@ -89,13 +119,13 @@ public class Calculator {
             throw new BadInputException("input should be a digit, '.', or a mathematical operator");
         }
 
-        if (input.isEmpty()){   // if input is a string, commit no changes.
+        if (input.isEmpty()){   // if input is an empty string, commit no changes.
             return jsonState;
         }
 
        if (jsonState == null){
-           if (!Character.isDigit(input.charAt(0))){
-               throw new BadInputException("first input has to be a digit.");
+           if (!Character.isDigit(input.charAt(0)) && !input.equals("-")){
+               throw new BadInputException("first input has to be a digit or '-' (in case of a negative number).");
            }
            JSONObject jsonObject = new JSONObject();
            jsonObject.put("display", input);
