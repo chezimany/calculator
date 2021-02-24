@@ -24,7 +24,7 @@ public class Calculator {
      * @param num - double to get string representation of.
      * @return - string representation of the double.
      */
-    private String stringOf(double num){
+    public static String stringOf(double num){
         String temp = String.valueOf(num);
         if (num == Math.floor(num) && !Double.isInfinite(num)){
             return temp.split("\\.")[0];
@@ -38,7 +38,10 @@ public class Calculator {
      * @param input - input to update the map.
      * @return - a string representation of the updated map.
      */
-    private String insertDigit(Map<String, String> jsonMap, char input){
+    private String insertDigit(Map<String, String> jsonMap, char input) throws BadInputException {
+        if (input == '.' && jsonMap.get("display").contains("\\.")){
+            throw new BadInputException("a number representation can not contain '.' twice");
+        }
         if (!jsonMap.get("lastInsertionWasOp").equals("true") || (jsonMap.get("lastInsertionWasOp").equals("true") && jsonMap.get("display").equals("-"))){     // if last insertion wasn't an operator
                                                                                                                                         // or last insertion declared a negative number
             jsonMap.put("display", jsonMap.get("display") + input);
@@ -67,31 +70,24 @@ public class Calculator {
                 double displayVal = Double.parseDouble(jsonMap.get("display"));
                 switch (jsonMap.get("operator")){
                     case "+":
-                        jsonMap.put("result", this.stringOf(currentVal + displayVal));
+                        jsonMap.put("result", stringOf(currentVal + displayVal));
                         break;
                     case "*":
-                        jsonMap.put("result", this.stringOf(currentVal * displayVal));
+                        jsonMap.put("result", stringOf(currentVal * displayVal));
                         break;
                     case "-":
-                        jsonMap.put("result", this.stringOf(currentVal - displayVal));
+                        jsonMap.put("result", stringOf(currentVal - displayVal));
                         break;
                     case "/":
                         if (displayVal == 0.0){
                             throw new BadInputException("Can not divide by zero.");
                         }
-                        jsonMap.put("result", this.stringOf(currentVal / displayVal));
+                        jsonMap.put("result", stringOf(currentVal / displayVal));
                         break;
                 }
-            }
-            else{
-                if (operator.equals("-")){
-                    jsonMap.put("display", operator);
-                }
-                else {
-                    jsonMap.put("operator", operator);
-                }
-            }
 
+            }
+            jsonMap.put("operator", operator);
         }
         else {
             jsonMap.put("result", jsonMap.get("display"));
