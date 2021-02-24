@@ -47,13 +47,14 @@ public class Calculator {
         if (input == '.' && jsonMap.get("display").contains("\\.")){
             throw new BadInputException("a number representation can not contain '.' twice");
         }
-        if (!jsonMap.get("lastInsertionWasOp").equals("true") || (jsonMap.get("lastInsertionWasOp").equals("true") && jsonMap.get("display").equals("-"))){     // if last insertion wasn't an operator
-                                                                                                                                        // or last insertion declared a negative number
+        if (!jsonMap.get("lastInsertionWasOp").equals("true")){     // if last insertion wasn't an operator
             jsonMap.put("display", jsonMap.get("display") + input);
         }
         else {
+            if (jsonMap.get("operator").equals(EQ)){
+                jsonMap.put("result", null);
+            }
             jsonMap.put("display", String.valueOf(input));
-            jsonMap.put("lastInsertionWasOp", "false");
         }
         jsonMap.put("lastInsertionWasOp", "false");
         return new JSONObject(jsonMap).toJSONString();
@@ -104,7 +105,6 @@ public class Calculator {
         }
         jsonMap.put("lastInsertionWasOp", "true");
         return new JSONObject(jsonMap).toJSONString();
-
     }
 
     /**

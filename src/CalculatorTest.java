@@ -16,14 +16,14 @@ public class CalculatorTest {
         this.ran = new Random();
     }
 
-    public void testString(String str, String result) throws BadInputException {
-        String test = null;
+    public String testString(String str, String result, String test) throws BadInputException {
         for (int i = 0; i < str.length(); i++) {
             String token = String.valueOf(str.charAt(i));
             test = this.calculator.calculateNextState(test, token);
         }
         Map<String, String> jsonMap = new Gson().fromJson(test, Map.class);
         assertEquals("failed to operate: " + str, result, jsonMap.get("display"));
+        return test;
     }
 
     @Test
@@ -32,7 +32,6 @@ public class CalculatorTest {
         int secondInt = ran.nextInt(1000);
         double firstDouble = ran.nextDouble() + firstInt;
         double secondDouble = ran.nextDouble() + secondInt;
-
 
         String intAdd = firstInt + Calculator.PLUS + secondInt + Calculator.EQ;
         String intAddRes = Calculator.stringOf(firstInt + secondInt);
@@ -71,28 +70,28 @@ public class CalculatorTest {
         String negDoubleDivRes = Calculator.stringOf((-firstDouble) / secondDouble);
 
         ///// test on positive integers /////
-        testString(intAdd, intAddRes);
-        testString(intSub, intSubRes);
-        testString(intMul, intMulRes);
-        testString(intDiv, intDivRes);
+        testString(intAdd, intAddRes, null);
+        testString(intSub, intSubRes, null);
+        testString(intMul, intMulRes, null);
+        testString(intDiv, intDivRes, null);
 
         ///// test on negative integers /////
-        testString(negIntAdd, negIntAddRes);
-        testString(negIntSub, negIntSubRes);
-        testString(negIntMul, negIntMulRes);
-        testString(negIntDiv, negIntDivRes);
+        testString(negIntAdd, negIntAddRes, null);
+        testString(negIntSub, negIntSubRes, null);
+        testString(negIntMul, negIntMulRes, null);
+        testString(negIntDiv, negIntDivRes, null);
 
         ///// test on positive doubles /////
-        testString(doubleAdd, doubleAddRes);
-        testString(doubleSub, doubleSubRes);
-        testString(doubleMul, doubleMulRes);
-        testString(doubleDiv, doubleDivRes);
+        testString(doubleAdd, doubleAddRes, null);
+        testString(doubleSub, doubleSubRes, null);
+        testString(doubleMul, doubleMulRes, null);
+        testString(doubleDiv, doubleDivRes, null);
 
         ///// test on negative doubles /////
-        testString(negDoubleAdd, negDoubleAddRes);
-        testString(negDoubleSub, negDoubleSubRes);
-        testString(negDoubleMul, negDoubleMulRes);
-        testString(negDoubleDiv, negDoubleDivRes);
+        testString(negDoubleAdd, negDoubleAddRes, null);
+        testString(negDoubleSub, negDoubleSubRes, null);
+        testString(negDoubleMul, negDoubleMulRes, null);
+        testString(negDoubleDiv, negDoubleDivRes, null);
     }
 
     @Test(expected = BadInputException.class)
@@ -101,8 +100,8 @@ public class CalculatorTest {
         double firstDouble = ran.nextDouble() + firstInt;
         String firstTest = firstInt + Calculator.DIV + ZERO + Calculator.EQ;
         String secondTest = firstDouble + Calculator.DIV + ZERO + Calculator.EQ;
-        testString(firstTest, "Should throw exception");
-        testString(secondTest, "Should Throw exception");
+        testString(firstTest, "Should throw exception", null);
+        testString(secondTest, "Should Throw exception", null);
     }
     @Test
     public void testMultipleOperatorsInARow() throws BadInputException {
@@ -112,9 +111,9 @@ public class CalculatorTest {
         String secondRes = "681.5";
         String thirdTest = "157.65+*-/15.38*-/+-*598.358+*-*-/*-+*25.32+-*/*-*+/569.23*-+-/-768=";
         String thirdRes = "-495.1809688428374";
-        testString(firstTest, firstRes);
-        testString(secondTest, secondRes);
-        testString(thirdTest, thirdRes);
+        testString(firstTest, firstRes, null);
+        testString(secondTest, secondRes, null);
+        testString(thirdTest, thirdRes, null);
     }
 
     @Test
@@ -123,10 +122,25 @@ public class CalculatorTest {
         String firstRes = "7.128540305010893";
         String SecondTest = "200+689.35*978.57-9.01/49.32*974.56+4581.236*75/487.23=";
         String SecondRes = "2647820.550969823";
-        testString(firstTest, firstRes);
-        testString(SecondTest, SecondRes);
+        testString(firstTest, firstRes, null);
+        testString(SecondTest, SecondRes, null);
+    }
 
-
+    @Test
+    public void testContinuousOperations() throws BadInputException {
+        String test = null;
+        String first = "15*54/22+68-93/3*15.47/10.56-9.345+87.60-45.23*2.23=";
+        String firstRes = "86.51522027089071";
+        String second = "15*98+56-48/52*28/7-6+89*4=";
+        String secondRes = "786.7692307692307";
+        String third = "+52+68-25*7=";
+        String thirdRes = "6172.384615384615";
+        String fourth = "*92.35+56-9=";
+        String fourthRes = "570066.7192307692";
+        test = testString(first, firstRes, test);
+        test = testString(second, secondRes, test);
+        test = testString(third, thirdRes, test);
+        testString(fourth, fourthRes, test);
     }
 
 }
