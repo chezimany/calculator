@@ -5,6 +5,11 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class Calculator {
+    public static final String PLUS = "+";
+    public static final String MINUS = "-";
+    public static final String MUL = "*";
+    public static final String DIV = "/";
+    public static final String EQ = "=";
     /**
      * a hash set to contain all types of operators
      */
@@ -12,11 +17,11 @@ public class Calculator {
 
     public Calculator(){
         this.operators = new HashSet<>();
-        this.operators.add("+");
-        this.operators.add("-");
-        this.operators.add("=");
-        this.operators.add("*");
-        this.operators.add("/");
+        this.operators.add(PLUS);
+        this.operators.add(MINUS);
+        this.operators.add(EQ);
+        this.operators.add(MUL);
+        this.operators.add(DIV);
     }
 
     /**
@@ -69,16 +74,16 @@ public class Calculator {
                 double currentVal = Double.parseDouble(jsonMap.get("result"));
                 double displayVal = Double.parseDouble(jsonMap.get("display"));
                 switch (jsonMap.get("operator")){
-                    case "+":
+                    case PLUS:
                         jsonMap.put("result", stringOf(currentVal + displayVal));
                         break;
-                    case "*":
+                    case MUL:
                         jsonMap.put("result", stringOf(currentVal * displayVal));
                         break;
-                    case "-":
+                    case MINUS:
                         jsonMap.put("result", stringOf(currentVal - displayVal));
                         break;
-                    case "/":
+                    case DIV:
                         if (displayVal == 0.0){
                             throw new BadInputException("Can not divide by zero.");
                         }
@@ -94,7 +99,7 @@ public class Calculator {
             jsonMap.put("operator", operator);
         }
 
-        if (operator.equals("=")){
+        if (operator.equals(EQ)){
             jsonMap.put("display", jsonMap.get("result"));
         }
         jsonMap.put("lastInsertionWasOp", "true");

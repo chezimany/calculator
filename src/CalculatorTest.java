@@ -6,6 +6,7 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 public class CalculatorTest {
+    public static final String ZERO = "0";
     private Calculator calculator;
     private Random ran;
 
@@ -13,80 +14,6 @@ public class CalculatorTest {
     public void setTest(){
         this.calculator = new Calculator();
         this.ran = new Random();
-    }
-
-    public void testOperationInt(int first, int second, String operation)throws BadInputException{
-        String strFirst = String.valueOf(first);
-        String strSec = String.valueOf(second);
-        int res;
-        double divideRes = 0;
-        switch (operation){
-            case "+":
-                res = first + second;
-                break;
-            case "-":
-                res = first - second;
-                break;
-            case "*":
-                res = first * second;
-                break;
-            default:
-                divideRes  = (double) first / (double) second;
-                res = 0;
-
-        }
-
-        String test = null;
-        for (int i = 0; i < strFirst.length(); i++){
-            String digit = String.valueOf(strFirst.charAt(i));
-            test = this.calculator.calculateNextState(test, digit);
-        }
-        test = this.calculator.calculateNextState(test, operation);
-        for (int i = 0; i < strSec.length(); i++){
-            String digit = String.valueOf(strSec.charAt(i));
-            test = this.calculator.calculateNextState(test, digit);
-        }
-        test = this.calculator.calculateNextState(test, "=");
-        Map<String, String> jsonMap = new Gson().fromJson(test, Map.class);
-        if (operation.equals("/")){
-            assertEquals("failed to operate: " + strFirst + operation + strSec, jsonMap.get("display"), Calculator.stringOf(divideRes));
-            return;
-        }
-        assertEquals("failed to operate: " + strFirst + operation + strSec, String.valueOf(res), jsonMap.get("display"));
-    }
-
-    public void testOperationDouble(double first, double second, String operation)throws BadInputException{
-        String strFirst = String.valueOf(first);
-        String strSec = String.valueOf(second);
-        double res;
-        switch (operation){
-            case "+":
-                res = first + second;
-                break;
-            case "-":
-                res = first - second;
-                break;
-            case "*":
-                res = first * second;
-                break;
-            default:
-                res  = first / second;
-
-        }
-
-        String test = null;
-        for (int i = 0; i < strFirst.length(); i++){
-            String token = String.valueOf(strFirst.charAt(i));
-            test = this.calculator.calculateNextState(test, token);
-        }
-        test = this.calculator.calculateNextState(test, operation);
-        for (int i = 0; i < strSec.length(); i++){
-            String token = String.valueOf(strSec.charAt(i));
-            test = this.calculator.calculateNextState(test, token);
-        }
-        test = this.calculator.calculateNextState(test, "=");
-        Map<String, String> jsonMap = new Gson().fromJson(test, Map.class);
-        assertEquals("failed to operate: " + strFirst + operation + strSec, jsonMap.get("display"), Calculator.stringOf(res));
     }
 
     public void testString(String str, String result) throws BadInputException {
@@ -106,38 +33,76 @@ public class CalculatorTest {
         double firstDouble = ran.nextDouble() + firstInt;
         double secondDouble = ran.nextDouble() + secondInt;
 
+
+        String intAdd = firstInt + Calculator.PLUS + secondInt + Calculator.EQ;
+        String intAddRes = Calculator.stringOf(firstInt + secondInt);
+        String intSub = firstInt + Calculator.MINUS + secondInt + Calculator.EQ;
+        String intSubRes = Calculator.stringOf(firstInt - secondInt);
+        String intMul = firstInt + Calculator.MUL + secondInt + Calculator.EQ;
+        String intMulRes = Calculator.stringOf(firstInt * secondInt);
+        String intDiv = firstInt + Calculator.DIV + secondInt + Calculator.EQ;
+        String intDivRes = Calculator.stringOf((double) firstInt / (double) secondInt);
+
+        String negIntAdd = -firstInt + Calculator.PLUS + secondInt + Calculator.EQ;
+        String negIntAddRes = Calculator.stringOf(-firstInt + secondInt);
+        String negIntSub = -firstInt + Calculator.MINUS + secondInt + Calculator.EQ;
+        String negIntSubRes = Calculator.stringOf(-firstInt - secondInt);
+        String negIntMul = -firstInt + Calculator.MUL + secondInt + Calculator.EQ;
+        String negIntMulRes = Calculator.stringOf(-firstInt * secondInt);
+        String negIntDiv = -firstInt + Calculator.DIV + secondInt + Calculator.EQ;
+        String negIntDivRes = Calculator.stringOf(((double) -firstInt) / (double) secondInt);
+
+        String doubleAdd = firstDouble + Calculator.PLUS + secondDouble + Calculator.EQ;
+        String doubleAddRes = Calculator.stringOf(firstDouble + secondDouble);
+        String doubleSub = firstDouble + Calculator.MINUS + secondDouble + Calculator.EQ;
+        String doubleSubRes = Calculator.stringOf(firstDouble - secondDouble);
+        String doubleMul = firstDouble + Calculator.MUL + secondDouble + Calculator.EQ;
+        String doubleMulRes = Calculator.stringOf(firstDouble * secondDouble);
+        String doubleDiv = firstDouble + Calculator.DIV + secondDouble + Calculator.EQ;
+        String doubleDivRes = Calculator.stringOf(firstDouble / secondDouble);
+
+        String negDoubleAdd = -firstDouble + Calculator.PLUS + secondDouble + Calculator.EQ;
+        String negDoubleAddRes = Calculator.stringOf(-firstDouble + secondDouble);
+        String negDoubleSub = -firstDouble + Calculator.MINUS + secondDouble + Calculator.EQ;
+        String negDoubleSubRes = Calculator.stringOf(-firstDouble - secondDouble);
+        String negDoubleMul = -firstDouble + Calculator.MUL + secondDouble + Calculator.EQ;
+        String negDoubleMulRes = Calculator.stringOf(-firstDouble * secondDouble);
+        String negDoubleDiv = -firstDouble + Calculator.DIV + secondDouble + Calculator.EQ;
+        String negDoubleDivRes = Calculator.stringOf((-firstDouble) / secondDouble);
+
         ///// test on positive integers /////
-        testOperationInt(firstInt, secondInt, "+");
-        testOperationInt(firstInt, secondInt, "*");
-        testOperationInt(firstInt, secondInt, "-");
-        testOperationInt(firstInt, secondInt, "/");
+        testString(intAdd, intAddRes);
+        testString(intSub, intSubRes);
+        testString(intMul, intMulRes);
+        testString(intDiv, intDivRes);
 
         ///// test on negative integers /////
-        testOperationInt(-firstInt, secondInt, "+");
-        testOperationInt(-firstInt, secondInt, "*");
-        testOperationInt(-firstInt, secondInt, "-");
-        testOperationInt(-firstInt, secondInt, "/");
+        testString(negIntAdd, negIntAddRes);
+        testString(negIntSub, negIntSubRes);
+        testString(negIntMul, negIntMulRes);
+        testString(negIntDiv, negIntDivRes);
 
         ///// test on positive doubles /////
-        testOperationDouble(firstDouble, secondDouble, "+");
-        testOperationDouble(firstDouble, secondDouble, "*");
-        testOperationDouble(firstDouble, secondDouble, "-");
-        testOperationDouble(firstDouble, secondDouble, "/");
+        testString(doubleAdd, doubleAddRes);
+        testString(doubleSub, doubleSubRes);
+        testString(doubleMul, doubleMulRes);
+        testString(doubleDiv, doubleDivRes);
 
         ///// test on negative doubles /////
-        testOperationDouble(-firstDouble, secondDouble, "*");
-        testOperationDouble(-firstDouble, secondDouble, "+");
-        testOperationDouble(-firstDouble, secondDouble, "-");
-        testOperationDouble(-firstDouble, secondDouble, "/");
+        testString(negDoubleAdd, negDoubleAddRes);
+        testString(negDoubleSub, negDoubleSubRes);
+        testString(negDoubleMul, negDoubleMulRes);
+        testString(negDoubleDiv, negDoubleDivRes);
     }
 
     @Test(expected = BadInputException.class)
     public void testDivideByZero() throws BadInputException {
         int firstInt = ran.nextInt(1000);
         double firstDouble = ran.nextDouble() + firstInt;
-        testOperationInt(firstInt, 0, "/");
-        testOperationDouble(firstDouble, 0, "/");
-        testOperationDouble(firstDouble, 0.0, "/");
+        String firstTest = firstInt + Calculator.DIV + ZERO + Calculator.EQ;
+        String secondTest = firstDouble + Calculator.DIV + ZERO + Calculator.EQ;
+        testString(firstTest, "Should throw exception");
+        testString(secondTest, "Should Throw exception");
     }
     @Test
     public void testMultipleOperatorsInARow() throws BadInputException {
